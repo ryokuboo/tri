@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>音声ページ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+      background-color: #f7f7f7;
+    }
+
+    #playBtn, #pauseBtn {
+      font-size: 22px;
+      padding: 16px 32px;
+      margin: 8px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #speedControl {
+      font-size: 16px;
+      margin: 20px auto;
+    }
+
+    #seekbar {
+      width: 100%;
+      max-width: 400px;
+      margin: 10px 0;
+    }
+
+    #timeDisplay {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    #externalLink {
+      display: inline-block;
+      margin-top: 30px;
+      background: #28a745;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 600px) {
+      #playBtn, #pauseBtn {
+        font-size: 28px;
+        padding: 18px 36px;
+      }
+
+      #speedControl {
+        font-size: 18px;
+      }
+
+      #externalLink {
+        font-size: 18px;
+        padding: 14px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="audio" src="audio.mp3"></audio>
+
+  <button id="playBtn">▶︎ 再生</button>
+  <button id="pauseBtn">⏸ 一時停止</button>
+
+  <div id="speedControl">
+    再生速度:
+    <select id="speedSelect">
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1.0x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+    </select>
+  </div>
+
+  <div id="timeDisplay">00:00 / 00:00</div>
+  <input type="range" id="seekbar" value="0" min="0" step="1">
+
+  <!-- 常時表示の広告主リンクボタン -->
+  <a href="https://repitta.com/" id="externalLink" target="_blank">広告主サイトへ</a>
+
+  <script>
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const seekbar = document.getElementById('seekbar');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const speedSelect = document.getElementById('speedSelect');
+
+    const redirectUrl = "https://repitta.com/"; // 自動遷移先URL
+
+    playBtn.addEventListener('click', () => {
+      audio.play();
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      audio.pause();
+    });
+
+    speedSelect.addEventListener('change', () => {
+      audio.playbackRate = parseFloat(speedSelect.value);
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      seekbar.max = Math.floor(audio.duration);
+      updateTimeDisplay();
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      seekbar.value = Math.floor(audio.currentTime);
+      updateTimeDisplay();
+    });
+
+    seekbar.addEventListener('input', () => {
+      audio.currentTime = seekbar.value;
+    });
+
+    // 🔁 再生終了後、自動で遷移
+    audio.addEventListener('ended', () => {
+      window.location.href = redirectUrl;
+    });
+
+    function updateTimeDisplay() {
+      const current = formatTime(audio.currentTime);
+      const total = formatTime(audio.duration);
+      timeDisplay.textContent = `${current} / ${total}`;
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+  </script>
+</body>
+</html>
